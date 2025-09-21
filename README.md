@@ -55,7 +55,7 @@ npm run dev
 
 The interface is pre-configured for Sepolia testnet with the following contracts:
 
-- **WSTON Proxy**: `0xc862bb7aabd2eac42c1517a5539a730845b806a5`
+- **WSTON Proxy**: `0x4e1e3e6De6F9aE2C0D8a21626082Ef70dBa87e6D`
 - **WTON Token**: `0x79e0d92670106c85e9067b56b8f674340dca0bbd`  
 - **TON Token**: `0xa30fe40285b8f5c0457dbc3b7c8a280373c40044`
 

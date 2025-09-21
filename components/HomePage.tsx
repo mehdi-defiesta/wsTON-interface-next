@@ -165,7 +165,7 @@ export default function HomePage() {
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-gray-600">WSTON Proxy:</span>
                     <code className="text-xs bg-gray-200 px-2 py-1 rounded font-mono">
-                    0x6F9994a02bF63c8b61bC5D1CbFC21671EacD84c2
+                    0x4e1e3e6De6F9aE2C0D8a21626082Ef70dBa87e6D
                     </code>
                   </div>
                   <div className="flex justify-between items-center text-sm">
