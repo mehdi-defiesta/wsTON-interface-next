@@ -20,7 +20,7 @@ export function WithdrawalForm() {
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'balanceOf',
-    args: [address],
+    args: [address as `0x${string}`],
     enabled: !!address,
     watch: true,
     onError: (error) => {
@@ -33,7 +33,7 @@ export function WithdrawalForm() {
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'getWithdrawalRequestIndex',
-    args: [address],
+    args: [address as `0x${string}`],
     enabled: !!address,
     watch: true,
     onError: (error) => {
@@ -46,7 +46,7 @@ export function WithdrawalForm() {
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'getTotalClaimableAmountByUser',
-    args: [address],
+    args: [address as `0x${string}`],
     enabled: !!address,
     watch: true,
     onError: (error) => {
@@ -75,7 +75,7 @@ export function WithdrawalForm() {
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'claimWithdrawalTotal',
-    enabled: claimableAmount && claimableAmount > 0n,
+    enabled: Boolean(claimableAmount && claimableAmount > BigInt(0)),
     onError: (error) => {
       setError('Unable to prepare claim transaction. Please try again later.');
     },
@@ -89,7 +89,7 @@ export function WithdrawalForm() {
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'processWithdrawalRequest',
-    args: [1n], // Process 1 request at a time
+    args: [BigInt(1)], // Process 1 request at a time
     enabled: false, // Only enable when we know there are requests to process
     onError: (error) => {
       // Silently handle "no request to process" errors
@@ -147,8 +147,8 @@ export function WithdrawalForm() {
     }
   };
 
-  const hasClaimableAmount = claimableAmount && claimableAmount > 0n;
-  const hasWithdrawalRequests = withdrawalIndex && withdrawalIndex > 0n;
+  const hasClaimableAmount = claimableAmount && claimableAmount > BigInt(0);
+  const hasWithdrawalRequests = withdrawalIndex && withdrawalIndex > BigInt(0);
 
   return (
     <div className="space-y-6">

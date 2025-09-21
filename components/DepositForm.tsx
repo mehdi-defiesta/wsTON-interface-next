@@ -29,7 +29,7 @@ export function DepositForm() {
     address: WTON_CONTRACT_ADDRESS,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
-    args: [address],
+    args: [address as `0x${string}`],
     enabled: !!address,
     watch: true,
   });
@@ -38,7 +38,7 @@ export function DepositForm() {
     address: TON_CONTRACT_ADDRESS,
     abi: ERC20_ABI,
     functionName: 'balanceOf',
-    args: [address],
+    args: [address as `0x${string}`],
     enabled: !!address,
     watch: true,
   });
@@ -47,7 +47,7 @@ export function DepositForm() {
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'balanceOf',
-    args: [address],
+    args: [address as `0x${string}`],
     enabled: !!address,
     watch: true,
   });
@@ -74,7 +74,7 @@ export function DepositForm() {
     address: WTON_CONTRACT_ADDRESS,
     abi: ERC20_ABI,
     functionName: 'allowance',
-    args: [address, WSTON_CONTRACT_ADDRESS],
+    args: [address as `0x${string}`, WSTON_CONTRACT_ADDRESS],
     enabled: !!address && isValidAmount(amount) && !showDepositStep && tokenType === 'WTON',
     watch: true,
     onError: (error) => {

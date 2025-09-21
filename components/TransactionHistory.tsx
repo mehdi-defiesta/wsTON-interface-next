@@ -36,7 +36,7 @@ export function TransactionHistory() {
         
         // Get the latest block number
         const latestBlock = await publicClient.getBlockNumber();
-        const fromBlock = latestBlock - 5n; // Use only 5 blocks to be extra safe with Alchemy free tier
+        const fromBlock = latestBlock - BigInt(5); // Use only 5 blocks to be extra safe with Alchemy free tier
         const toBlock = latestBlock; // Use specific block number instead of 'latest'
         
         console.log(`Fetching logs from block ${fromBlock} to ${toBlock} (range: ${Number(toBlock - fromBlock)} blocks)`);
@@ -160,7 +160,7 @@ export function TransactionHistory() {
         }
 
         // Get block timestamps for all unique blocks
-        const blockNumbers = [...new Set(processableLogs.map(log => log.blockNumber))];
+        const blockNumbers = Array.from(new Set(processableLogs.map(log => log.blockNumber)));
         
         const blockTimestamps: Record<string, number> = {};
         await Promise.all(
@@ -188,7 +188,7 @@ export function TransactionHistory() {
               timestamp: blockTimestamps[log.blockNumber.toString()] || 0,
               blockNumber: Number(log.blockNumber),
               user: log.args.user?.toString() || '',
-              token: log.args.token ? 'TON' : 'WTON'
+              token: (log.args.token ? 'TON' : 'WTON') as 'TON' | 'WTON'
             })),
             ...withdrawalRequestLogs.map(log => ({
               hash: log.transactionHash,
@@ -216,7 +216,7 @@ export function TransactionHistory() {
             timestamp: blockTimestamps[log.blockNumber.toString()] || 0,
             blockNumber: Number(log.blockNumber),
             user: log.args.to?.toString() || '', // Use 'to' address as user
-            token: 'WSTON' as const
+            token: 'WTON' as const
           }));
         }
 

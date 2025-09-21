@@ -6,16 +6,13 @@ import { sepolia, mainnet } from 'wagmi/chains';
 import { publicProvider } from 'wagmi/providers/public';
 import { alchemyProvider } from 'wagmi/providers/alchemy';
 
-const providers = [publicProvider()];
-
-// Only add Alchemy if API key is provided
-if (process.env.NEXT_PUBLIC_ALCHEMY_ID) {
-  providers.unshift(alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_ID }));
-}
+const providers = process.env.NEXT_PUBLIC_ALCHEMY_ID 
+  ? [alchemyProvider({ apiKey: process.env.NEXT_PUBLIC_ALCHEMY_ID }), publicProvider()]
+  : [publicProvider()];
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [sepolia, mainnet],
-  providers
+  providers as any
 );
 
 const { connectors } = getDefaultWallets({
