@@ -1,0 +1,27 @@
+[profile.default]
+auto_detect_solc = true
+solc_version = "0.8.25"
+src = "src"
+out = "out"
+viaIR = true
+optimizer = true # Enable the optimizer
+optimizer_runs = 20 # Set the number of optimizer runs
+libs = ["lib"]
+fs_permissions = [
+    { access = "read", path = "lib/foundry-chainlink-toolkit/out" },
+]
+
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts-upgradeable/lib/openzeppelin-contracts/contracts/",
+    "@openzeppelin/contracts-upgradeable/=lib/openzeppelin-contracts-upgradeable/contracts/"
+]
+
+# Optional: Additional optimizer details
+[profile.default.optimizer_details]
+constantOptimizer = true
+yul = true
+
+[profile.default.optimizer_details.yulDetails]
+stackAllocation = true
+optimizerSteps = 'dhfoDgvulfnTUtnIf'
+
