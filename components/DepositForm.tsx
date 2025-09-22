@@ -15,13 +15,13 @@ export function DepositForm() {
   const [amount, setAmount] = useState('');
   const [tokenType, setTokenType] = useState<'WTON' | 'TON'>('WTON');
   const [showDepositStep, setShowDepositStep] = useState(false);
-  const [prepareTonTransaction, setPrepareTonTransaction] = useState(false);
+  const [tonWorkflowStep, setTonWorkflowStep] = useState<'approve-ton' | 'swap-ton' | 'approve-wton' | 'deposit' | 'completed'>('approve-ton');
   const { address } = useAccount();
 
   // Reset states when token type changes
   useEffect(() => {
     setShowDepositStep(false);
-    setPrepareTonTransaction(false);
+    setTonWorkflowStep('approve-ton');
   }, [tokenType]);
 
   // Get user balances
@@ -108,15 +108,15 @@ export function DepositForm() {
     }
   });
 
-  // Prepare WTON deposit transaction 
+  // Prepare WTON deposit transaction (for both WTON and TON workflows)
   const { config: depositConfig } = usePrepareContractWrite({
     address: WSTON_CONTRACT_ADDRESS,
     abi: WSTON_ABI,
     functionName: 'depositWTONAndGetWSTON',
     args: [parseInputAmount(amount, 27)], // Only WTON amount needed
-    enabled: isValidAmount(amount) && tokenType === 'WTON' && (
-      !needsApproval || // No approval needed
-      (approvalSuccess && showDepositStep) // Approval completed successfully
+    enabled: isValidAmount(amount) && (
+      (tokenType === 'WTON' && (!needsApproval || (approvalSuccess && showDepositStep))) ||
+      (tokenType === 'TON' && tonWorkflowStep === 'deposit')
     ),
     onError: (error) => {
       // Silently handle contract simulation errors
@@ -124,44 +124,75 @@ export function DepositForm() {
     },
   });
 
-  // Prepare TON approveAndCall transaction - only when about to submit
-  const { config: tonApproveAndCallConfig } = usePrepareContractWrite({
+  // Check TON allowance for WTON contract
+  const { data: tonAllowance } = useContractRead({
     address: TON_CONTRACT_ADDRESS,
     abi: ERC20_ABI,
-    functionName: 'approveAndCall',
-    args: [
-      WSTON_CONTRACT_ADDRESS as `0x${string}`,
-      parseInputAmount(amount, 18),
-      // Encode deposit contract address and layer2 address (64 bytes total)
-      (address && layer2Address) ? AbiCoder.defaultAbiCoder().encode(
-        ['address', 'address'],
-        [
-          WSTON_CONTRACT_ADDRESS, // deposit contract address
-          layer2Address as `0x${string}` // layer2 address from contract
-        ]
-      ) as `0x${string}` : '0x' as `0x${string}`
-    ],
-    enabled: prepareTonTransaction && isValidAmount(amount) && tokenType === 'TON' && !!address,
-    onError: (error) => {
-      // Only log when we're actually trying to execute
-      if (prepareTonTransaction) {
-        console.error('TON approveAndCall preparation failed:', error.message);
-      }
-    },
+    functionName: 'allowance',
+    args: [address as `0x${string}`, WTON_CONTRACT_ADDRESS],
+    enabled: !!address && isValidAmount(amount) && tokenType === 'TON',
+    watch: true,
+  });
+
+  // Check if TON approval is sufficient for swap
+  const tonNeedsApproval = tokenType === 'TON' && tonAllowance !== undefined && tonAllowance !== null && 
+    isValidAmount(amount) && 
+    parseInputAmount(amount, 18) > tonAllowance;
+
+  // TON Workflow Step 1: Approve WTON contract as spender for TON (not WSTON)
+  const { config: tonApproveConfig } = usePrepareContractWrite({
+    address: TON_CONTRACT_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: 'approve',
+    args: [WTON_CONTRACT_ADDRESS, parseInputAmount(amount, 18)],
+    enabled: isValidAmount(amount) && tokenType === 'TON' && tonWorkflowStep === 'approve-ton',
+  });
+
+  // TON Workflow Step 2: Swap TON to WTON (using WTON contract)
+  const { config: swapFromTonConfig } = usePrepareContractWrite({
+    address: WTON_CONTRACT_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: 'swapFromTON',
+    args: [parseInputAmount(amount, 18)],
+    enabled: isValidAmount(amount) && tokenType === 'TON' && tonWorkflowStep === 'swap-ton' && !tonNeedsApproval,
+  });
+
+  // TON Workflow Step 3: Approve WSTON as spender for WTON (after swap)
+  const { config: wtonApproveConfig } = usePrepareContractWrite({
+    address: WTON_CONTRACT_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: 'approve',
+    args: [WSTON_CONTRACT_ADDRESS, parseInputAmount(amount, 27)], // WTON has 27 decimals
+    enabled: isValidAmount(amount) && tokenType === 'TON' && tonWorkflowStep === 'approve-wton',
   });
 
   const { write: deposit, data: depositData } = useContractWrite(depositConfig);
   const { isLoading: isDepositing } = useWaitForTransaction({ hash: depositData?.hash });
 
-  const { write: tonApproveAndCall, data: tonApproveAndCallData } = useContractWrite(tonApproveAndCallConfig);
+  // TON Workflow Contract Writes
+  const { write: tonApprove, data: tonApproveData } = useContractWrite(tonApproveConfig);
+  const { isLoading: isTonApproving } = useWaitForTransaction({ 
+    hash: tonApproveData?.hash,
+    onSuccess: () => setTonWorkflowStep('swap-ton')
+  });
+
+  const { write: swapFromTon, data: swapFromTonData } = useContractWrite(swapFromTonConfig);
+  const { isLoading: isSwapping } = useWaitForTransaction({ 
+    hash: swapFromTonData?.hash,
+    onSuccess: () => setTonWorkflowStep('approve-wton')
+  });
+
+  const { write: wtonApprove, data: wtonApproveData } = useContractWrite(wtonApproveConfig);
+  const { isLoading: isWtonApproving } = useWaitForTransaction({ 
+    hash: wtonApproveData?.hash,
+    onSuccess: () => setTonWorkflowStep('deposit')
+  });
+
+  // For TON deposits, use the same deposit function but only when workflow reaches deposit step
   const { isLoading: isTonDepositing } = useWaitForTransaction({ 
-    hash: tonApproveAndCallData?.hash,
-    onSuccess: () => {
-      setPrepareTonTransaction(false); // Reset preparation state
-    },
-    onError: () => {
-      setPrepareTonTransaction(false); // Reset preparation state on error too
-    }
+    hash: depositData?.hash,
+    enabled: tokenType === 'TON',
+    onSuccess: () => setTonWorkflowStep('completed')
   });
 
   // Calculate estimated WSTON amount user will receive
@@ -183,12 +214,27 @@ export function DepositForm() {
     if (!isValidAmount(amount)) return;
 
     if (tokenType === 'TON') {
-      // Enable transaction preparation and execute
-      setPrepareTonTransaction(true);
-      // Give preparation a moment to complete, then execute
-      setTimeout(() => {
-        tonApproveAndCall?.();
-      }, 100);
+      // Handle the 4-step TON workflow
+      switch (tonWorkflowStep) {
+        case 'approve-ton':
+          tonApprove?.();
+          break;
+        case 'swap-ton':
+          if (tonNeedsApproval) {
+            // If approval is insufficient, go back to approve step
+            setTonWorkflowStep('approve-ton');
+            tonApprove?.();
+          } else {
+            swapFromTon?.();
+          }
+          break;
+        case 'approve-wton':
+          wtonApprove?.();
+          break;
+        case 'deposit':
+          deposit?.();
+          break;
+      }
     } else {
       // For WTON, use the two-step approve + deposit method
       if (needsApproval && !showDepositStep) {
@@ -297,7 +343,7 @@ export function DepositForm() {
           )}
 
           {/* Transaction Status */}
-          {isValidAmount(amount) && needsApproval && tokenType === 'WTON' && (
+          {isValidAmount(amount) && tokenType === 'WTON' && needsApproval && (
             <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
               <div className="text-sm text-primary-700 text-center">
                 {isApproving ? (
@@ -310,15 +356,40 @@ export function DepositForm() {
               </div>
             </div>
           )}
+
+          {/* TON 4-step Workflow Status */}
+          {isValidAmount(amount) && tokenType === 'TON' && (
+            <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
+              <div className="text-sm text-primary-700 text-center">
+                {isTonApproving ? (
+                  <span>Step 1/4: Approving TON spending...</span>
+                ) : isSwapping ? (
+                  <span>Step 2/4: Swapping TON to WTON...</span>
+                ) : isWtonApproving ? (
+                  <span>Step 3/4: Approving WTON spending...</span>
+                ) : isTonDepositing ? (
+                  <span>Step 4/4: Depositing WTON...</span>
+                ) : tonWorkflowStep === 'completed' ? (
+                  <span>✅ All steps completed! WSTON received.</span>
+                ) : tonWorkflowStep === 'swap-ton' && tonNeedsApproval ? (
+                  <span>⚠️ Insufficient TON approval. Please increase approval amount.</span>
+                ) : tonWorkflowStep === 'swap-ton' ? (
+                  <span>✅ Step 1 complete! Now swap TON to WTON</span>
+                ) : tonWorkflowStep === 'approve-wton' ? (
+                  <span>✅ Step 2 complete! Now approve WTON spending</span>
+                ) : tonWorkflowStep === 'deposit' ? (
+                  <span>✅ Step 3 complete! Now deposit WTON</span>
+                ) : (
+                  <span>Step 1: First approve TON spending</span>
+                )}
+              </div>
+            </div>
+          )}
           
-          {(isDepositing || isTonDepositing) && (
+          {isDepositing && tokenType === 'WTON' && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <div className="text-sm text-green-700 text-center">
-                {tokenType === 'TON' ? (
-                  <span>Depositing {tokenType} and minting WSTON...</span>
-                ) : (
-                  <span>Step 2/2: Depositing {tokenType}...</span>
-                )}
+                <span>Step 2/2: Depositing {tokenType}...</span>
               </div>
             </div>
           )}
@@ -329,24 +400,62 @@ export function DepositForm() {
             variant="gradient"
             size="lg"
             className="w-full"
-            disabled={!isValidAmount(amount) || isApproving || isDepositing || isTonDepositing || !address}
+            disabled={!isValidAmount(amount) || isApproving || isDepositing || isTonApproving || isSwapping || isWtonApproving || isTonDepositing || !address || (tokenType === 'TON' && tonWorkflowStep === 'completed')}
           >
-            {isApproving ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Approving {tokenType}...
-              </>
-            ) : (isDepositing || isTonDepositing) ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                {tokenType === 'TON' ? 'Depositing...' : 'Depositing...'}
-              </>
-            ) : tokenType === 'TON' ? (
-              `Deposit ${tokenType}`
-            ) : needsApproval && !showDepositStep ? (
-              `Approve ${tokenType} Spending`
+            {tokenType === 'TON' ? (
+              // TON workflow button states
+              isTonApproving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Approving TON...
+                </>
+              ) : isSwapping ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Swapping TON to WTON...
+                </>
+              ) : isWtonApproving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Approving WTON...
+                </>
+              ) : isTonDepositing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Depositing WTON...
+                </>
+              ) : tonWorkflowStep === 'completed' ? (
+                'Completed ✅'
+              ) : tonWorkflowStep === 'approve-ton' ? (
+                'Approve TON Spending'
+              ) : tonWorkflowStep === 'swap-ton' && tonNeedsApproval ? (
+                'Increase TON Approval'
+              ) : tonWorkflowStep === 'swap-ton' ? (
+                'Swap TON to WTON'
+              ) : tonWorkflowStep === 'approve-wton' ? (
+                'Approve WTON Spending'
+              ) : tonWorkflowStep === 'deposit' ? (
+                'Deposit WTON'
+              ) : (
+                'Start TON Deposit'
+              )
             ) : (
-              `Deposit ${tokenType}`
+              // WTON workflow button states (existing logic)
+              isApproving ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Approving {tokenType}...
+                </>
+              ) : isDepositing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Depositing...
+                </>
+              ) : needsApproval && !showDepositStep ? (
+                `Approve ${tokenType} Spending`
+              ) : (
+                `Deposit ${tokenType}`
+              )
             )}
           </Button>
         </form>
