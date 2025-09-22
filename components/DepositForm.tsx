@@ -359,31 +359,38 @@ export function DepositForm() {
 
           {/* TON 4-step Workflow Status */}
           {isValidAmount(amount) && tokenType === 'TON' && (
-            <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
-              <div className="text-sm text-primary-700 text-center">
-                {isTonApproving ? (
-                  <span>Step 1/4: Approving TON spending...</span>
-                ) : isSwapping ? (
-                  <span>Step 2/4: Swapping TON to WTON...</span>
-                ) : isWtonApproving ? (
-                  <span>Step 3/4: Approving WTON spending...</span>
-                ) : isTonDepositing ? (
-                  <span>Step 4/4: Depositing WTON...</span>
-                ) : tonWorkflowStep === 'completed' ? (
-                  <span>✅ All steps completed! WSTON received.</span>
-                ) : tonWorkflowStep === 'swap-ton' && tonNeedsApproval ? (
-                  <span>⚠️ Insufficient TON approval. Please increase approval amount.</span>
-                ) : tonWorkflowStep === 'swap-ton' ? (
-                  <span>✅ Step 1 complete! Now swap TON to WTON</span>
-                ) : tonWorkflowStep === 'approve-wton' ? (
-                  <span>✅ Step 2 complete! Now approve WTON spending</span>
-                ) : tonWorkflowStep === 'deposit' ? (
-                  <span>✅ Step 3 complete! Now deposit WTON</span>
-                ) : (
-                  <span>Step 1: First approve TON spending</span>
-                )}
+            <>
+              <div className="bg-primary-50 border border-primary-200 rounded-lg p-3">
+                <div className="text-sm text-primary-700 text-center">
+                  {isTonApproving ? (
+                    <span>Step 1/4: Approving TON spending...</span>
+                  ) : isSwapping ? (
+                    <span>Step 2/4: Swapping TON to WTON...</span>
+                  ) : isWtonApproving ? (
+                    <span>Step 3/4: Approving WTON spending...</span>
+                  ) : isTonDepositing ? (
+                    <span>Step 4/4: Depositing WTON...</span>
+                  ) : tonWorkflowStep === 'completed' ? (
+                    <span>✅ All steps completed! WSTON received.</span>
+                  ) : tonWorkflowStep === 'swap-ton' && tonNeedsApproval ? (
+                    <span>⚠️ Insufficient TON approval. Please increase approval amount.</span>
+                  ) : tonWorkflowStep === 'swap-ton' ? (
+                    <span>✅ Step 1 complete! Now swap TON to WTON</span>
+                  ) : tonWorkflowStep === 'approve-wton' ? (
+                    <span>✅ Step 2 complete! Now approve WTON spending</span>
+                  ) : tonWorkflowStep === 'deposit' ? (
+                    <span>✅ Step 3 complete! Now deposit WTON</span>
+                  ) : (
+                    <span>Step 1: First approve TON spending</span>
+                  )}
+                </div>
               </div>
-            </div>
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                <div className="text-sm text-yellow-700 text-center">
+                  ⚠️ Note: This workflow doesn't use the callback function yet
+                </div>
+              </div>
+            </>
           )}
           
           {isDepositing && tokenType === 'WTON' && (

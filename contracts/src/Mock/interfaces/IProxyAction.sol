@@ -7,27 +7,17 @@ interface IProxyAction {
     /// @param newImplementation Address of the new implementation.
     /// @param _index index
     /// @param _alive _alive
-    function setImplementation2(
-        address newImplementation,
-        uint256 _index,
-        bool _alive
-    ) external;
+    function setImplementation2(address newImplementation, uint256 _index, bool _alive) external;
 
     /// @dev set alive status of implementation
     /// @param newImplementation Address of the new implementation.
     /// @param _alive alive status
-    function setAliveImplementation2(
-        address newImplementation,
-        bool _alive
-    ) external;
+    function setAliveImplementation2(address newImplementation, bool _alive) external;
 
     /// @dev set selectors of Implementation
     /// @param _selectors being added selectors
     /// @param _imp implementation address
-    function setSelectorImplementations2(
-        bytes4[] calldata _selectors,
-        address _imp
-    ) external;
+    function setSelectorImplementations2(bytes4[] calldata _selectors, address _imp) external;
 
     /// onlyOwner
 
@@ -40,9 +30,7 @@ interface IProxyAction {
     /// @dev view implementation address of selector of function
     /// @param _selector selector of function
     /// @return impl address of the implementation
-    function getSelectorImplementation2(
-        bytes4 _selector
-    ) external view returns (address impl);
+    function getSelectorImplementation2(bytes4 _selector) external view returns (address impl);
 
     /// @dev view implementation address of the proxy[index]
     /// @param _index index of proxy

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.4;
 
 interface IRefactor {
-  struct Balance {
+    struct Balance {
         uint256 balance;
         uint256 refactoredCount;
     }

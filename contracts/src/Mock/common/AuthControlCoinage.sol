@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./AuthRoleCoinage.sol";
 
@@ -20,7 +20,6 @@ contract AuthControlCoinage is AuthRoleCoinage, ERC165, AccessControl {
         require(hasRole(OPERATOR_ROLE, msg.sender), "AuthControl: Caller is not an operator");
         _;
     }
-
 
     /// @dev add admin
     /// @param account  address to add

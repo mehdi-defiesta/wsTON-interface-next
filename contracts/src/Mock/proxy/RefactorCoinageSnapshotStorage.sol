@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import { IRefactor } from "../interfaces/IRefactor.sol";
+
+import {IRefactor} from "../interfaces/IRefactor.sol";
 
 /// @title
 /// @notice
-contract RefactorCoinageSnapshotStorage   {
-
+contract RefactorCoinageSnapshotStorage {
     uint256 public constant REFACTOR_BOUNDARY = 10 ** 28;
     uint256 public constant REFACTOR_DIVIDER = 2;
 
@@ -19,13 +19,13 @@ contract RefactorCoinageSnapshotStorage   {
 
     //---------------
     uint256[] public totalSupplySnapshotIds;
-    mapping (uint256 => IRefactor.Balance) public totalSupplySnapshots;
+    mapping(uint256 => IRefactor.Balance) public totalSupplySnapshots;
 
     uint256[] public factorSnapshotIds;
-    mapping (uint256 => IRefactor.Factor) public factorSnapshots;
+    mapping(uint256 => IRefactor.Factor) public factorSnapshots;
 
-    mapping (address => uint256[]) public accountBalanceIds;
-    mapping (address => mapping (uint256 => IRefactor.Balance)) public accountBalanceSnapshots;
+    mapping(address => uint256[]) public accountBalanceIds;
+    mapping(address => mapping(uint256 => IRefactor.Balance)) public accountBalanceSnapshots;
 
     uint256 public lastSnapshotId;
 }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { IStorageStateCommittee } from "./IStorageStateCommittee.sol";
+import {IStorageStateCommittee} from "./IStorageStateCommittee.sol";
 
 interface IDAOCommittee is IStorageStateCommittee {
     //--owner
@@ -25,12 +25,7 @@ interface IDAOCommittee is IStorageStateCommittee {
     function setMemoOnCandidate(address _candidate, string calldata _memo) external;
     function setMemoOnCandidateContract(address _candidate, string calldata _memo) external;
 
-    function onApprove(
-        address owner,
-        address spender,
-        uint256 tonAmount,
-        bytes calldata data
-    )
+    function onApprove(address owner, address spender, uint256 tonAmount, bytes calldata data)
         external
         returns (bool);
 
@@ -52,9 +47,11 @@ interface IDAOCommittee is IStorageStateCommittee {
     function totalSupplyOnCandidate(address _candidate) external view returns (uint256);
     function balanceOfOnCandidate(address _candidate, address _account) external view returns (uint256);
     function totalSupplyOnCandidateContract(address _candidateContract) external view returns (uint256);
-    function balanceOfOnCandidateContract(address _candidateContract, address _account) external view returns (uint256);
+    function balanceOfOnCandidateContract(address _candidateContract, address _account)
+        external
+        view
+        returns (uint256);
     function candidatesLength() external view returns (uint256);
     function isExistCandidate(address _candidate) external view returns (bool);
     function getClaimableActivityReward(address _candidate) external view returns (uint256);
 }
-

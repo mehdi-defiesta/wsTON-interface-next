@@ -8,7 +8,7 @@ contract L1WrappedStakedTONStorage {
         bool processed;
     }
 
-    uint256 public constant DECIMALS = 10**27;
+    uint256 public constant DECIMALS = 10 ** 27;
 
     bool internal paused;
 
@@ -24,7 +24,7 @@ contract L1WrappedStakedTONStorage {
     uint8 internal maxNumWithdrawal;
 
     mapping(address => WithdrawalRequest[]) internal withdrawalRequests;
-    mapping (address => uint256) internal withdrawalRequestIndex;
+    mapping(address => uint256) internal withdrawalRequestIndex;
     mapping(address => uint8) internal numWithdrawalRequestsByUser;
 
     // Array to keep track of users who have made withdrawal requests
@@ -32,7 +32,9 @@ contract L1WrappedStakedTONStorage {
     mapping(address => bool) internal userExists;
 
     //deposit even
-    event Deposited(address to, bool token, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber);
+    event Deposited(
+        address to, bool token, uint256 amount, uint256 wstonAmount, uint256 depositTime, uint256 depositBlockNumber
+    );
     event decodeSuccess(address to, uint256 amount);
     event SeigniorageUpdated();
 
@@ -71,5 +73,4 @@ contract L1WrappedStakedTONStorage {
     error ContractPaused();
     error MaximumNumberOfWithdrawalsReached();
     error ZeroAmount();
-
 }

@@ -4,7 +4,6 @@ pragma solidity 0.8.25;
 import "./L1BaseTest.sol";
 
 contract L1WrappedStakedTONTest is L1BaseTest {
-
     function setUp() public override {
         super.setUp();
     }
@@ -12,8 +11,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     // ----------------------------------- INITIALIZERS --------------------------------------
 
     /**
-    * @notice test the behavior of initialize function if called for a second time
-    */
+     * @notice test the behavior of initialize function if called for a second time
+     */
     function testInitializeWstonContractShouldRevertIfCalledTwice() public {
         vm.startPrank(owner);
         vm.expectRevert();
@@ -33,18 +32,18 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of setDepositManagerAddress function
-    */
+     * @notice test the behavior of setDepositManagerAddress function
+     */
     function testsetDepositManagerAddress() public {
         vm.startPrank(owner);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).setDepositManagerAddress(address(0x1));
-        assert(L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getDepositManager() == address(0x1));  
+        assert(L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getDepositManager() == address(0x1));
         vm.stopPrank();
     }
 
     /**
-    * @notice test the behavior of setDepositManagerAddress function if the caller is not the owner
-    */
+     * @notice test the behavior of setDepositManagerAddress function if the caller is not the owner
+     */
     function testsetDepositManagerAddressShouldRevertIfNotOwner() public {
         // user1 tries to setDepositManager address
         vm.startPrank(user1);
@@ -54,8 +53,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of setSeigManagerAddress function
-    */
+     * @notice test the behavior of setSeigManagerAddress function
+     */
     function testsetSeigManagerAddress() public {
         vm.startPrank(owner);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).setSeigManagerAddress(address(0x2));
@@ -64,8 +63,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of setSeigManagerAddress function if the caller is not the owner
-    */
+     * @notice test the behavior of setSeigManagerAddress function if the caller is not the owner
+     */
     function testsetSeigManagerAddressShouldRevertIfNotOwner() public {
         // user1 tries to setSeigManager address
         vm.startPrank(user1);
@@ -77,16 +76,18 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     // ----------------------------------- CORE FUNCTIONS -------------------------------------
 
     /**
-    * @notice test the behavior of depositWTONAndGetWSTON function using WTON 
-    */
+     * @notice test the behavior of depositWTONAndGetWSTON function using WTON
+     */
     function testDeposit() public {
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
 
         // Call the depositAndGetWSTON function
-        vm.expectEmit(true,true,true,true);
-        emit L1WrappedStakedTONStorage.Deposited(user1, false, depositAmount, depositAmount, block.timestamp, block.number);
+        vm.expectEmit(true, true, true, true);
+        emit L1WrappedStakedTONStorage.Deposited(
+            user1, false, depositAmount, depositAmount, block.timestamp, block.number
+        );
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
 
         //check if user's Titan WSTON balance = 200 WSTON
@@ -97,14 +98,14 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         vm.stopPrank();
     }
 
-        /**
-    * @notice test the behavior of depositWTONAndGetWSTON function using TON
-    */
+    /**
+     * @notice test the behavior of depositWTONAndGetWSTON function using TON
+     */
     function testDeposit_TON() public {
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**18;
+        uint256 depositAmount = 200 * 10 ** 18;
         bytes memory data = abi.encode(user1, depositAmount);
-        
+
         TON(ton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
 
         // Call TON.approveAndCall directly
@@ -120,12 +121,12 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of depositWTONAndGetWSTON function if called for the second time by another user
-    * we ensure that the staking index is computing the right amount of WSTON to be minted
-    */
+     * @notice test the behavior of depositWTONAndGetWSTON function if called for the second time by another user
+     * we ensure that the staking index is computing the right amount of WSTON to be minted
+     */
     function testSecondDeposit() public {
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         // Call the depositAndGetWSTON function
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
@@ -149,8 +150,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of depositWTONAndGetWSTON function if the amount passed is equal to zero
-    */
+     * @notice test the behavior of depositWTONAndGetWSTON function if the amount passed is equal to zero
+     */
     function testDepositShouldRevertIfAmountEqualToZero() public {
         vm.startPrank(user1);
         // set amount to 0
@@ -161,14 +162,13 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         vm.stopPrank();
     }
 
-
     /**
-    * @notice test the behavior of requestWithdrawal function
-    */
+     * @notice test the behavior of requestWithdrawal function
+     */
     function testRequestWithdrawal() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -188,14 +188,14 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 withdrawal request
         vm.startPrank(user1);
         // Request withdrawal
-        vm.expectEmit(true,true,true,true);
-        emit L1WrappedStakedTONStorage.WithdrawalRequested(user1,depositAmount);
+        vm.expectEmit(true, true, true, true);
+        emit L1WrappedStakedTONStorage.WithdrawalRequested(user1, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(depositAmount);
         uint256 stakingIndex = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getStakingIndex();
         uint256 expectedWTONAmount = (depositAmount * stakingIndex) / DECIMALS;
 
-
-        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getLastWithdrawalRequest(user1);
+        L1WrappedStakedTONStorage.WithdrawalRequest memory request =
+            L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getLastWithdrawalRequest(user1);
         assert(request.amount == expectedWTONAmount);
         assert(request.processed == false);
         assert(request.withdrawableBlockNumber == (block.number + delay));
@@ -203,8 +203,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of requestWithdrawal function if the user does not have enough WSTON 
-    */
+     * @notice test the behavior of requestWithdrawal function if the user does not have enough WSTON
+     */
     function testRequestWithdrawalShouldRevertIfNotEnoughWston() public {
         // deposit 200 WTON for 200 WSTON
         testDeposit();
@@ -217,12 +217,12 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of claimWithdrawalTotal function 
-    */
+     * @notice test the behavior of claimWithdrawalTotal function
+     */
     function testClaimWithdrawalTotal() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -252,11 +252,12 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // expected amount to be received ===> check the emit event to see if it's corresponding
         uint256 tonAmountReceived = (depositAmount * stakingIndexBefore) / 1e36;
 
-        vm.expectEmit(true,true,true,true);
+        vm.expectEmit(true, true, true, true);
         emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, tonAmountReceived);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).claimWithdrawalTotal();
-        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getWithdrawalRequest(user1, 0);
-       
+        L1WrappedStakedTONStorage.WithdrawalRequest memory request =
+            L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getWithdrawalRequest(user1, 0);
+
         //checking the staking index is not affected
         uint256 stakingIndexAfter = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getStakingIndex();
         assert(stakingIndexAfter == stakingIndexBefore);
@@ -267,31 +268,26 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice test the behavior of claimWithdrawalTotal function 
-    */
+     * @notice test the behavior of claimWithdrawalTotal function
+     */
     function testClaimWithdrawalTotalShouldRevertIfNoClaimableAmount() public {
         // deposit, request withdrawal and claim total
         testClaimWithdrawalTotal();
 
         vm.startPrank(user1);
         // trying to reclaim
-       vm.expectRevert(
-            abi.encodeWithSelector(
-                L1WrappedStakedTONStorage.NoClaimableAmount.selector,
-                user1
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(L1WrappedStakedTONStorage.NoClaimableAmount.selector, user1));
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).claimWithdrawalTotal();
         vm.stopPrank();
     }
 
     /**
-    * @notice test the behavior of claimWithdrawalIndex function 
-    */
+     * @notice test the behavior of claimWithdrawalIndex function
+     */
     function testClaimWithdrawalIndex() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -311,8 +307,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 withdrawal request
         vm.startPrank(user1);
         // Making 2 withdrawal requests. one is 50 WSTON the other is 10 WSTON
-        uint256 firstWithdrawalAmount = 50*10**27;
-        uint256 secondWithdrawalAmount = 10*10**27;
+        uint256 firstWithdrawalAmount = 50 * 10 ** 27;
+        uint256 secondWithdrawalAmount = 10 * 10 ** 27;
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(firstWithdrawalAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(secondWithdrawalAmount);
 
@@ -322,15 +318,15 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         //1007868027750759615961946603
         uint256 stakingIndexBefore = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getStakingIndex();
 
-
         // calculate the amount expected to be sent ( in WTON)
         uint256 amountToBeSend = (secondWithdrawalAmount * stakingIndexBefore) / 1e36;
         // Claim the withdrawal by index
-        vm.expectEmit(true,true,true,true);
+        vm.expectEmit(true, true, true, true);
         emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, amountToBeSend);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).claimWithdrawalIndex(1);
 
-        L1WrappedStakedTONStorage.WithdrawalRequest memory request = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getWithdrawalRequest(user1, 1);
+        L1WrappedStakedTONStorage.WithdrawalRequest memory request =
+            L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getWithdrawalRequest(user1, 1);
         // Check that the staking index is not affected
         uint256 stakingIndexAfter = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getStakingIndex();
         assert(stakingIndexAfter == stakingIndexBefore);
@@ -345,7 +341,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     function testClaimWithdrawalIndexShouldRevertIfWrongRequestIndex() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -365,8 +361,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 withdrawal request
         vm.startPrank(user1);
         // Making 2 withdrawal requests. one is 50 WSTON the other is 10 WSTON
-        uint256 firstWithdrawalAmount = 50*10**27;
-        uint256 secondWithdrawalAmount = 10*10**27;
+        uint256 firstWithdrawalAmount = 50 * 10 ** 27;
+        uint256 secondWithdrawalAmount = 10 * 10 ** 27;
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(firstWithdrawalAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(secondWithdrawalAmount);
 
@@ -381,7 +377,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     function testClaimWithdrawalIndexShouldRevertIfAlreadyProcessed() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -401,8 +397,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 withdrawal request
         vm.startPrank(user1);
         // Making 2 withdrawal requests. one is 50 WSTON the other is 10 WSTON
-        uint256 firstWithdrawalAmount = 50*10**27;
-        uint256 secondWithdrawalAmount = 10*10**27;
+        uint256 firstWithdrawalAmount = 50 * 10 ** 27;
+        uint256 secondWithdrawalAmount = 10 * 10 ** 27;
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(firstWithdrawalAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(secondWithdrawalAmount);
 
@@ -413,7 +409,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // calculate the amount expected to be sent ( in WTON)
         uint256 amountToBeSend = (secondWithdrawalAmount * stakingIndexBefore) / 1e36;
         // Claim the withdrawal with index = 1
-        vm.expectEmit(true,true,true,true);
+        vm.expectEmit(true, true, true, true);
         emit L1WrappedStakedTONStorage.WithdrawalProcessed(user1, amountToBeSend);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).claimWithdrawalIndex(1);
 
@@ -426,7 +422,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     function testClaimWithdrawalIndexShouldRevertIfDelayNotElapsed() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -446,8 +442,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         // user1 withdrawal request
         vm.startPrank(user1);
         // Making 2 withdrawal requests. one is 50 WSTON the other is 10 WSTON
-        uint256 firstWithdrawalAmount = 50*10**27;
-        uint256 secondWithdrawalAmount = 10*10**27;
+        uint256 firstWithdrawalAmount = 50 * 10 ** 27;
+        uint256 secondWithdrawalAmount = 10 * 10 ** 27;
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(firstWithdrawalAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(secondWithdrawalAmount);
 
@@ -458,13 +454,13 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice this tests aims to prove that if 2 different user request withdrawal and one of them claimWithdrawal, 
-    * the second user is still able to claimWithdrawal 
-    */
+     * @notice this tests aims to prove that if 2 different user request withdrawal and one of them claimWithdrawal,
+     * the second user is still able to claimWithdrawal
+     */
     function testClaimWithdrawalByTwoDifferentUsers() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -503,21 +499,20 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice checking if requestWithdrawal reverts if the caller has already reached the maximum withdrawals limit
-    */
+     * @notice checking if requestWithdrawal reverts if the caller has already reached the maximum withdrawals limit
+     */
     function testrequestWithdrawalShouldRevertIfTooManyRequests() public {
         // user1 deposit
         vm.startPrank(user1);
-        uint256 depositAmount = 100000 * 10**27;
+        uint256 depositAmount = 100000 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
-
 
         // move to the next 200000 block
         vm.roll(block.number + 200000);
 
         // requesting 1 request less than the limit
-        for (uint i = 0; i < maxNumWithdrawal; ++i) {
+        for (uint256 i = 0; i < maxNumWithdrawal; ++i) {
             L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(10 * 1e27);
         }
 
@@ -526,15 +521,14 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(10 * 1e27);
     }
 
-
     /**
      * @notice Test TON deposit using direct approveAndCall pattern
      */
     function testDepositTONAndGetWSTON() public {
         vm.startPrank(user1);
-        uint256 tonDepositAmount = 200 * 10**18;
+        uint256 tonDepositAmount = 200 * 10 ** 18;
         bytes memory data = abi.encode(user1, tonDepositAmount);
-        
+
         // Approve the contract to spend user's TON
         TON(ton).approve(l1wrappedstakedtonProxyAddress, tonDepositAmount);
 
@@ -555,12 +549,14 @@ contract L1WrappedStakedTONTest is L1BaseTest {
      */
     function testDepositWTONStillWorks() public {
         vm.startPrank(user1);
-        uint256 wtonDepositAmount = 100 * 10**27;
+        uint256 wtonDepositAmount = 100 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, wtonDepositAmount);
 
         // Call the WTON deposit function
-        vm.expectEmit(true,true,true,true);
-        emit L1WrappedStakedTONStorage.Deposited(user1, false, wtonDepositAmount, wtonDepositAmount, block.timestamp, block.number);
+        vm.expectEmit(true, true, true, true);
+        emit L1WrappedStakedTONStorage.Deposited(
+            user1, false, wtonDepositAmount, wtonDepositAmount, block.timestamp, block.number
+        );
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(wtonDepositAmount);
 
         //check if user's Titan WSTON balance = 100 WSTON
@@ -578,21 +574,21 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         vm.startPrank(user1);
         uint256 depositAmount = 0;
         bytes memory data = abi.encode(user1, depositAmount);
-        
+
         // Even with 0 amount, we need approval for the transaction to proceed to the amount check
         TON(ton).approve(l1wrappedstakedtonProxyAddress, 1);
-        
+
         vm.expectRevert(L1WrappedStakedTONStorage.InvalidToOrAmount.selector);
         TON(ton).approveAndCall(l1wrappedstakedtonProxyAddress, depositAmount, data);
         vm.stopPrank();
     }
-    
+
     /**
-    * @notice testing the behavior of onApprove function
-    */
+     * @notice testing the behavior of onApprove function
+     */
     function testOnApprove() public {
         vm.startPrank(user1);
-        uint256 tonDepositAmount = 100 * 10**18;
+        uint256 tonDepositAmount = 100 * 10 ** 18;
         bytes memory data = abi.encode(user1, tonDepositAmount);
 
         //approving the proxy to spend TON
@@ -609,33 +605,28 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     }
 
     /**
-    * @notice testing the behavior of onApprove function if the caller is neither TON or WTON addresses
-    */
+     * @notice testing the behavior of onApprove function if the caller is neither TON or WTON addresses
+     */
     function testOnApproveShouldRevertIfCalledByWrongContract() public {
         vm.startPrank(user1);
-        uint256 tonDepositAmount = 100 * 10**18;
+        uint256 tonDepositAmount = 100 * 10 ** 18;
         bytes memory data = abi.encode(user1, tonDepositAmount);
         // try to call onApprove using user1 EOA
         vm.expectRevert(L1WrappedStakedTONStorage.InvalidCaller.selector);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).onApprove(
-            user1,
-            user1,
-            tonDepositAmount,
-            data
-        );
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).onApprove(user1, user1, tonDepositAmount, data);
         vm.stopPrank();
     }
 
     /**
-    * @notice testing the behavior of onApprove function if the caller is neither TON or WTON addresses
-    */
+     * @notice testing the behavior of onApprove function if the caller is neither TON or WTON addresses
+     */
     function testOnApproveShouldRevertIfInvalidData() public {
         vm.startPrank(user1);
-        uint256 tonDepositAmount = 100 * 10**18;
+        uint256 tonDepositAmount = 100 * 10 ** 18;
         uint256 dummyData = 1;
         bytes memory data = abi.encode(user1, tonDepositAmount, dummyData);
         // try to call onApprove using user1 EOA
-         //approving the proxy to spend TON
+        //approving the proxy to spend TON
         TON(ton).approve(l1wrappedstakedtonProxyAddress, tonDepositAmount);
 
         vm.expectRevert(L1WrappedStakedTONStorage.InvalidOnApproveData.selector);
@@ -654,7 +645,7 @@ contract L1WrappedStakedTONTest is L1BaseTest {
     function testNumWithdrawableRequests() public {
         // user1 deposit 200 WTON
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -673,8 +664,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         // user1 makes 2 withdrawal requests for a total of 100 WSTON
         vm.startPrank(user1);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
         vm.stopPrank();
 
         // move to the next 1000000 block
@@ -687,8 +678,8 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         // user2 makes 2 withdrawals requests for a total of 100 WSTON
         vm.startPrank(user2);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
         vm.stopPrank();
 
         // move to the next 1000000 block
@@ -700,21 +691,21 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         uint256 index = DepositManager(depositManager).withdrawalRequestIndex(candidate, l1wrappedstakedtonProxyAddress); // should be equal to 2
         uint256 numberPendingRequests = numRequests - index; // should be equal to 2
         uint256 count;
-        for(uint256 i = 0; i < numberPendingRequests; ++i) {
-            (uint128 withdrawableBlockNumber,,bool processed) = DepositManager(depositManager).withdrawalRequest(candidate, l1wrappedstakedtonProxyAddress, index + i);
-            if(withdrawableBlockNumber <= block.number && !processed) {
+        for (uint256 i = 0; i < numberPendingRequests; ++i) {
+            (uint128 withdrawableBlockNumber,, bool processed) =
+                DepositManager(depositManager).withdrawalRequest(candidate, l1wrappedstakedtonProxyAddress, index + i);
+            if (withdrawableBlockNumber <= block.number && !processed) {
                 count++;
             }
         }
         console.log("count: ", count);
         assert(count == 2);
-
     }
 
     function testGetTotalClaimableAmountByUser() public {
         // user1 deposit 200 WTON
         vm.startPrank(user1);
-        uint256 depositAmount = 200 * 10**27;
+        uint256 depositAmount = 200 * 10 ** 27;
         WTON(wton).approve(l1wrappedstakedtonProxyAddress, depositAmount);
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).depositWTONAndGetWSTON(depositAmount);
         vm.stopPrank();
@@ -733,23 +724,22 @@ contract L1WrappedStakedTONTest is L1BaseTest {
 
         // user1 makes 2 withdrawal requests for a total of 100 WSTON
         vm.startPrank(user1);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
         vm.stopPrank();
 
         // move to the next 1000000 block
         vm.roll(block.number + 1000000);
 
-
         // user2 makes 2 withdrawals requests for a total of 100 WSTON
         vm.startPrank(user2);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
-        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50*1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
+        L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).requestWithdrawal(50 * 1e27);
         vm.stopPrank();
 
-        uint256 totalClaimableAmount = L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getTotalClaimableAmountByUser(user1);
-        console.log("totalClaimableAmount user1: ",totalClaimableAmount);
-
+        uint256 totalClaimableAmount =
+            L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).getTotalClaimableAmountByUser(user1);
+        console.log("totalClaimableAmount user1: ", totalClaimableAmount);
     }
 
     // ----------------------------------- PAUSE/UNPAUSE --------------------------------------
@@ -816,5 +806,4 @@ contract L1WrappedStakedTONTest is L1BaseTest {
         L1WrappedStakedTON(l1wrappedstakedtonProxyAddress).unpause();
         vm.stopPrank();
     }
-    
 }

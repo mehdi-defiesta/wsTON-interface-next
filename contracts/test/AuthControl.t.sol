@@ -5,7 +5,6 @@ import "./L1BaseTest.sol";
 import {AuthControl} from "../src/common/AuthControl.sol";
 
 contract AuthControlTest is L1BaseTest {
-
     function setUp() public override {
         super.setUp();
     }
@@ -115,5 +114,4 @@ contract AuthControlTest is L1BaseTest {
         L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).transferOwnership(address(0));
         vm.stopPrank();
     }
-
 }

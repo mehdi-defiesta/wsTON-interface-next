@@ -28,7 +28,7 @@ interface IWTON {
 }
 
 interface IOnApprove {
-  function onApprove(address owner, address spender, uint256 amount, bytes calldata data) external returns (bool);
+    function onApprove(address owner, address spender, uint256 amount, bytes calldata data) external returns (bool);
 }
 
 /**
@@ -47,7 +47,7 @@ contract L1WrappedStakedTON is
     L1WrappedStakedTONStorage
 {
     using SafeERC20 for IERC20;
-        
+
     /**
      * @notice Modifier to ensure the contract is not paused.
      */
@@ -130,7 +130,7 @@ contract L1WrappedStakedTON is
         minimumWithdrawalAmount = _minimumWithdrawalAmount;
         maxNumWithdrawal = _maxNumWithdrawal;
         stakingIndex = DECIMALS;
-        
+
         // Register the onApprove interface exactly like TON/WTON does
         _registerInterface(this.onApprove.selector);
     }
@@ -168,12 +168,11 @@ contract L1WrappedStakedTON is
      * @param data Additional data for the approval.
      * @return Returns true if the operation is successful.
      */
-    function onApprove(
-        address owner,
-        address spender,
-        uint256 tonAmount,
-        bytes calldata data
-    ) external override returns (bool) {
+    function onApprove(address owner, address spender, uint256 tonAmount, bytes calldata data)
+        external
+        override
+        returns (bool)
+    {
         if (msg.sender != ton) {
             revert InvalidCaller();
         }
@@ -181,33 +180,30 @@ contract L1WrappedStakedTON is
         if (tonAmount == 0) {
             revert ZeroAmount();
         }
-           
+
         // Approve WTON to spend our TON for the swap
         IERC20(ton).approve(wton, tonAmount);
-        
+
         // Swap our TON to WTON - this will transfer TON from us to WTON and mint WTON to us
         require(IWTON(wton).swapFromTON(tonAmount));
 
         // TON to WTON conversion: 1 TON = 1e9 WTON (due to decimals difference)
         uint256 wtonAmount = tonAmount * 1e9;
-        
+
         // Now we have the WTON in our contract, process the deposit manually
-         _depositWTONAndGetWSTONTo(owner, wtonAmount);
-        
+        _depositWTONAndGetWSTONTo(owner, wtonAmount);
+
         return true;
     }
 
-    function _decodeTONApproveData(
-        bytes memory data
-    ) internal pure returns (address deposit, address layer2) {
+    function _decodeTONApproveData(bytes memory data) internal pure returns (address deposit, address layer2) {
         require(data.length == 0x40);
 
         assembly {
-        deposit := mload(add(data, 0x20))
-        layer2 := mload(add(data, 0x40))
+            deposit := mload(add(data, 0x20))
+            layer2 := mload(add(data, 0x40))
         }
     }
-
 
     /**
      * @dev Deposits WTON and mints WSTON for the sender.
@@ -349,12 +345,12 @@ contract L1WrappedStakedTON is
         }
 
         // minimum withdrawal amount implemented to avoid the function claimWithdrawal to run out of gas
-        if(_wstonAmount < minimumWithdrawalAmount) {
+        if (_wstonAmount < minimumWithdrawalAmount) {
             revert MinimalWithdrawalAmount();
         }
 
         // revert if the user has reached the maximum number of withdrawal requests
-        if(numWithdrawalRequestsByUser[msg.sender] == maxNumWithdrawal) {
+        if (numWithdrawalRequestsByUser[msg.sender] == maxNumWithdrawal) {
             revert MaximumNumberOfWithdrawalsReached();
         }
 
@@ -419,13 +415,13 @@ contract L1WrappedStakedTON is
 
         totalClaimableAmount = totalClaimableAmount / 10 ** 9;
         /// if there is enough funds in the contract, it means that someone else has already processRequest
-        /// this avoid the scenario where processRequest fails because it was already called previously 
+        /// this avoid the scenario where processRequest fails because it was already called previously
         /// and no request can be processed anymore in the depositManager
-        if(IERC20(ton).balanceOf(address(this)) >= totalClaimableAmount) {
+        if (IERC20(ton).balanceOf(address(this)) >= totalClaimableAmount) {
             IERC20(ton).safeTransfer(msg.sender, totalClaimableAmount);
-        } else{
+        } else {
             uint256 _numWithdrawableRequests = numWithdrawableRequests();
-            if(_numWithdrawableRequests > 0) {               
+            if (_numWithdrawableRequests > 0) {
                 if (!IDepositManager(depositManager).processRequests(layer2Address, _numWithdrawableRequests, true)) {
                     revert ProcessRequestFailed();
                 }
@@ -447,7 +443,7 @@ contract L1WrappedStakedTON is
             revert NoRequestToProcess();
         }
 
-        // stack the withdrawal request corresponding to the index 
+        // stack the withdrawal request corresponding to the index
         WithdrawalRequest storage request = withdrawalRequests[msg.sender][_index];
 
         // revert if the request has been procesed
@@ -464,20 +460,19 @@ contract L1WrappedStakedTON is
         withdrawalRequests[msg.sender][_index].processed = true;
 
         // decrease the number of withdrawal requests for this user
-        numWithdrawalRequestsByUser[msg.sender] --;
+        numWithdrawalRequestsByUser[msg.sender]--;
 
         // staking the amount to be withdrawn
         uint256 amount = (request.amount) / 10 ** 9;
 
         /// if there is enough funds in the contract, it means that someone else has already processRequest
-        /// this avoid the scenario where processRequest fails because it was already called previously 
+        /// this avoid the scenario where processRequest fails because it was already called previously
         /// and no request can be processed anymore in the depositManager
-        if(IERC20(ton).balanceOf(address(this)) >= amount) {
+        if (IERC20(ton).balanceOf(address(this)) >= amount) {
             IERC20(ton).safeTransfer(msg.sender, amount);
-        } 
-        else {
+        } else {
             uint256 _numWithdrawableRequests = numWithdrawableRequests();
-            if(_numWithdrawableRequests > 0) {               
+            if (_numWithdrawableRequests > 0) {
                 if (!IDepositManager(depositManager).processRequests(layer2Address, _numWithdrawableRequests, true)) {
                     revert ProcessRequestFailed();
                 }
@@ -492,9 +487,9 @@ contract L1WrappedStakedTON is
     /**
      * @notice process one or multiple requests. This function can be called by anyone
      */
-    function processWithdrawalRequest(uint256 numRequests) external returns(bool) {
+    function processWithdrawalRequest(uint256 numRequests) external returns (bool) {
         if (!IDepositManager(depositManager).processRequests(layer2Address, numRequests, true)) {
-                revert ProcessRequestFailed();
+            revert ProcessRequestFailed();
         }
         return true;
     }
@@ -544,11 +539,11 @@ contract L1WrappedStakedTON is
         uint256 _wstonAmount = (_amount * DECIMALS) / stakingIndex;
         return _wstonAmount;
     }
-    
+
     /**
-     * @notice calculating the number of withdrawal requests that can be processed 
+     * @notice calculating the number of withdrawal requests that can be processed
      * @dev we fetch the number of requests made by the contract, as well as the number of the last index
-     * @dev we iterrate over the number of pending requests and check if it is withdrawable 
+     * @dev we iterrate over the number of pending requests and check if it is withdrawable
      * @return count the total number of withdrawable requests
      */
     function numWithdrawableRequests() internal view returns (uint256) {
@@ -559,9 +554,10 @@ contract L1WrappedStakedTON is
         if (numRequests == 0) return 0;
         uint256 numberPendingRequests = numRequests - index;
 
-        for(uint256 i = 0; i < numberPendingRequests; ++i) {
-            (uint128 withdrawableBlockNumber,,bool processed) = IDepositManager(depositManager).withdrawalRequest(layer2Address, address(this), index  + i);
-            if(withdrawableBlockNumber <= block.number && !processed) {
+        for (uint256 i = 0; i < numberPendingRequests; ++i) {
+            (uint128 withdrawableBlockNumber,, bool processed) =
+                IDepositManager(depositManager).withdrawalRequest(layer2Address, address(this), index + i);
+            if (withdrawableBlockNumber <= block.number && !processed) {
                 count++;
             }
         }
@@ -621,11 +617,11 @@ contract L1WrappedStakedTON is
         return stakingIndex;
     }
 
-    function getWtonAmount(uint256 _wstonAmount) external view returns(uint256) {
+    function getWtonAmount(uint256 _wstonAmount) external view returns (uint256) {
         return ((_wstonAmount * stakingIndex) / DECIMALS);
     }
 
-    function getTonAmount(uint256 _wstonAmount) external view returns(uint256) {
+    function getTonAmount(uint256 _wstonAmount) external view returns (uint256) {
         return (((_wstonAmount * stakingIndex) / DECIMALS) / 1e9);
     }
 
@@ -652,5 +648,4 @@ contract L1WrappedStakedTON is
     function getPaused() external view returns (bool) {
         return paused;
     }
-
 }

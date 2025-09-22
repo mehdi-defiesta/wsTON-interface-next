@@ -8,6 +8,4 @@ import "./RefactorCoinageSnapshotStorage.sol";
  * @title
  * @dev
  */
-contract RefactorCoinageSnapshotProxy is ProxyCoinage, RefactorCoinageSnapshotStorage {
-
-}
+contract RefactorCoinageSnapshotProxy is ProxyCoinage, RefactorCoinageSnapshotStorage {}

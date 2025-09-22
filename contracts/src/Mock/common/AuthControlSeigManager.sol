@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { ERC165 } from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
+import {ERC165} from "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import "./AuthRoleSeigManager.sol";
 
@@ -73,6 +73,7 @@ contract AuthControlSeigManager is AuthRoleSeigManager, ERC165, AccessControl {
     }
     /// @dev transfer admin
     /// @param newAdmin new admin address
+
     function transferAdmin(address newAdmin) public virtual onlyOwner {
         require(newAdmin != address(0), "Accessible: zero address");
         require(msg.sender != newAdmin, "Accessible: same admin");

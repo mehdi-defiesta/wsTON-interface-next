@@ -56,7 +56,7 @@ contract DeployL1WrappedStakedTONProxy is Script {
 
         // Initialize the contract through the proxy
         console.log("Initializing contract through proxy...");
-        (bool success, ) = address(proxy).call(initData);
+        (bool success,) = address(proxy).call(initData);
         require(success, "Initialization failed");
         console.log("Contract initialized successfully");
 

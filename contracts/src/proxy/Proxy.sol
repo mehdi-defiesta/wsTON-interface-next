@@ -8,13 +8,7 @@ import "../interfaces/IProxyAction.sol";
 
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
 
-contract Proxy is
-    ProxyStorage,
-    AuthControl,
-    IProxyEvent,
-    IProxyAction
-{
-
+contract Proxy is ProxyStorage, AuthControl, IProxyEvent, IProxyAction {
     /* ========== CONSTRUCTOR ========== */
 
     constructor() {
@@ -38,35 +32,22 @@ contract Proxy is
     }
 
     /// @inheritdoc IProxyAction
-    function setImplementation2(
-        address newImplementation,
-        uint256 _index,
-        bool _alive
-    ) external override onlyOwner {
+    function setImplementation2(address newImplementation, uint256 _index, bool _alive) external override onlyOwner {
         _setImplementation2(newImplementation, _index, _alive);
     }
 
     /// @inheritdoc IProxyAction
-    function setAliveImplementation2(
-        address newImplementation,
-        bool _alive
-    ) public override onlyOwner {
+    function setAliveImplementation2(address newImplementation, bool _alive) public override onlyOwner {
         _setAliveImplementation2(newImplementation, _alive);
     }
 
     /// @inheritdoc IProxyAction
-    function setSelectorImplementations2(
-        bytes4[] calldata _selectors,
-        address _imp
-    ) public override onlyOwner {
+    function setSelectorImplementations2(bytes4[] calldata _selectors, address _imp) public override onlyOwner {
         require(_selectors.length > 0, "Proxy: _selectors's size is zero");
         require(aliveImplementation[_imp], "Proxy: _imp is not alive");
 
         for (uint256 i = 0; i < _selectors.length; ++i) {
-            require(
-                selectorImplementation[_selectors[i]] != _imp,
-                "LiquidityVaultProxy: same imp"
-            );
+            require(selectorImplementation[_selectors[i]] != _imp, "LiquidityVaultProxy: same imp");
             selectorImplementation[_selectors[i]] = _imp;
             emit SetSelectorImplementation(_selectors[i], _imp);
         }
@@ -82,27 +63,23 @@ contract Proxy is
     }
 
     /// @inheritdoc IProxyAction
-    function implementation2(
-        uint256 _index
-    ) external view override returns (address) {
+    function implementation2(uint256 _index) external view override returns (address) {
         return _implementation2(_index);
     }
 
     /// @inheritdoc IProxyAction
-    function getSelectorImplementation2(
-        bytes4 _selector
-    ) public view override returns (address impl) {
-        if (selectorImplementation[_selector] == address(0))
+    function getSelectorImplementation2(bytes4 _selector) public view override returns (address impl) {
+        if (selectorImplementation[_selector] == address(0)) {
             return proxyImplementation[0];
-        else if (aliveImplementation[selectorImplementation[_selector]]) {
+        } else if (aliveImplementation[selectorImplementation[_selector]]) {
             return selectorImplementation[_selector];
-        } else return proxyImplementation[0];
+        } else {
+            return proxyImplementation[0];
+        }
     }
 
     /// @dev receive ether
-    receive() external payable {
-
-    }
+    receive() external payable {}
 
     /// @dev fallback function , execute on undefined function call
     fallback() external payable {
@@ -114,19 +91,14 @@ contract Proxy is
     /// @dev view implementation address of the proxy[index]
     /// @param _index index of proxy
     /// @return impl address of the implementation
-    function _implementation2(
-        uint256 _index
-    ) internal view returns (address impl) {
+    function _implementation2(uint256 _index) internal view returns (address impl) {
         return proxyImplementation[_index];
     }
 
     /// @dev fallback function , execute on undefined function call
     function _fallback() internal {
         address _impl = getSelectorImplementation2(msg.sig);
-        require(
-            _impl != address(0) && !pauseProxy,
-            "Proxy: impl OR proxy is false"
-        );
+        require(_impl != address(0) && !pauseProxy, "Proxy: impl OR proxy is false");
 
         assembly {
             // Copy msg.data. We take full control of memory in this inline assembly
@@ -143,12 +115,8 @@ contract Proxy is
 
             switch result
             // delegatecall returns 0 on error.
-            case 0 {
-                revert(0, returndatasize())
-            }
-            default {
-                return(0, returndatasize())
-            }
+            case 0 { revert(0, returndatasize()) }
+            default { return(0, returndatasize()) }
         }
     }
 
@@ -156,11 +124,7 @@ contract Proxy is
     /// @param newImplementation Address of the new implementation.
     /// @param _index index of proxy
     /// @param _alive alive status
-    function _setImplementation2(
-        address newImplementation,
-        uint256 _index,
-        bool _alive
-    ) internal {
+    function _setImplementation2(address newImplementation, uint256 _index, bool _alive) internal {
         require(isContract(newImplementation), "Proxy: not contract address");
         if (_alive) proxyImplementation[_index] = newImplementation;
         _setAliveImplementation2(newImplementation, _alive);
@@ -169,10 +133,7 @@ contract Proxy is
     /// @dev set alive status of implementation
     /// @param newImplementation Address of the new implementation.
     /// @param _alive alive status
-    function _setAliveImplementation2(
-        address newImplementation,
-        bool _alive
-    ) internal {
+    function _setAliveImplementation2(address newImplementation, bool _alive) internal {
         aliveImplementation[newImplementation] = _alive;
         emit SetAliveImplementation(newImplementation, _alive);
     }

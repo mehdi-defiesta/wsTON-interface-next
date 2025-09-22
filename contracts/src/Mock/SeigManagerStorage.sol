@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
-import { RefactorCoinageSnapshotI } from "./interfaces/RefactorCoinageSnapshotI.sol";
+
+import {RefactorCoinageSnapshotI} from "./interfaces/RefactorCoinageSnapshotI.sol";
 
 /// @title
 /// @notice
-contract SeigManagerStorage   {
-
+contract SeigManagerStorage {
     //////////////////////////////
     // Constants
     //////////////////////////////
 
-    uint256 constant public RAY = 10 ** 27; // 1 RAY
-    uint256 constant internal _DEFAULT_FACTOR = RAY;
+    uint256 public constant RAY = 10 ** 27; // 1 RAY
+    uint256 internal constant _DEFAULT_FACTOR = RAY;
 
-    uint256 constant public MAX_VALID_COMMISSION = RAY; // 1 RAY
-    uint256 constant public MIN_VALID_COMMISSION = 10 ** 25; // 0.01 RAY
+    uint256 public constant MAX_VALID_COMMISSION = RAY; // 1 RAY
+    uint256 public constant MIN_VALID_COMMISSION = 10 ** 25; // 0.01 RAY
 
     //////////////////////////////
     // Common contracts
@@ -42,10 +42,10 @@ contract SeigManagerStorage   {
     RefactorCoinageSnapshotI internal _tot;
 
     // coinage token for each layer2.
-    mapping (address => RefactorCoinageSnapshotI) internal _coinages;
+    mapping(address => RefactorCoinageSnapshotI) internal _coinages;
 
     // last commit block number for each layer2.
-    mapping (address => uint256) internal _lastCommitBlock;
+    mapping(address => uint256) internal _lastCommitBlock;
 
     // total seigniorage per block
     uint256 internal _seigPerBlock;
@@ -58,16 +58,16 @@ contract SeigManagerStorage   {
     uint256 internal _unpausedBlock;
 
     // commission rates in RAY
-    mapping (address => uint256) internal _commissionRates;
+    mapping(address => uint256) internal _commissionRates;
 
     // whether commission is negative or not (default=possitive)
-    mapping (address => bool) internal _isCommissionRateNegative;
+    mapping(address => bool) internal _isCommissionRateNegative;
 
     // setting commissionrate delay
     uint256 public adjustCommissionDelay;
-    mapping (address => uint256) public delayedCommissionBlock;
-    mapping (address => uint256) public delayedCommissionRate;
-    mapping (address => bool) public delayedCommissionRateNegative;
+    mapping(address => uint256) public delayedCommissionBlock;
+    mapping(address => uint256) public delayedCommissionRate;
+    mapping(address => bool) public delayedCommissionRateNegative;
 
     // minimum deposit amount
     uint256 public minimumAmount;
@@ -80,5 +80,4 @@ contract SeigManagerStorage   {
 
     bool public paused;
     uint256 public lastSnapshotId;
-
 }

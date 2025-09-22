@@ -4,8 +4,20 @@ pragma solidity ^0.8.4;
 library LibAgenda {
     //using LibAgenda for Agenda;
 
-    enum AgendaStatus { NONE, NOTICE, VOTING, WAITING_EXEC, EXECUTED, ENDED }
-    enum AgendaResult { PENDING, ACCEPT, REJECT, DISMISS }
+    enum AgendaStatus {
+        NONE,
+        NOTICE,
+        VOTING,
+        WAITING_EXEC,
+        EXECUTED,
+        ENDED
+    }
+    enum AgendaResult {
+        PENDING,
+        ACCEPT,
+        REJECT,
+        DISMISS
+    }
 
     //votor : based operator
     struct Voter {

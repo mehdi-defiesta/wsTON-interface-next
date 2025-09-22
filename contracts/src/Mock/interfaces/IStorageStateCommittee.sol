@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { ICandidateFactory } from "./ICandidateFactory.sol";
-import { Layer2RegistryI } from "./Layer2RegistryI.sol";
-import { SeigManagerI } from "./SeigManagerI.sol";
-import { IDAOAgendaManager } from "./IDAOAgendaManager.sol";
-import { IDAOVault } from "../interfaces/IDAOVault.sol";
+import {ICandidateFactory} from "./ICandidateFactory.sol";
+import {Layer2RegistryI} from "./Layer2RegistryI.sol";
+import {SeigManagerI} from "./SeigManagerI.sol";
+import {IDAOAgendaManager} from "./IDAOAgendaManager.sol";
+import {IDAOVault} from "../interfaces/IDAOVault.sol";
 
 interface IStorageStateCommittee {
     struct CandidateInfo {
@@ -32,5 +32,3 @@ interface IStorageStateCommittee {
     function isMember(address _candidate) external returns (bool);
     function candidateContract(address _candidate) external returns (address);
 }
-
-

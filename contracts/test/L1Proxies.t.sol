@@ -6,7 +6,6 @@ import {MockL1WrappedStakedTONUpgraded} from "./mock/MockL1WrappedStakedTONUpgra
 import {MockL1WrappedStakedTONFactoryUpgraded} from "./mock/MockL1WrappedStakedTONFactoryUpgraded.sol";
 
 contract L1ProxyTest is L1WrappedStakedTONTest {
-
     MockL1WrappedStakedTONUpgraded mockL1WrappedStakedTONUpgraded;
     MockL1WrappedStakedTONFactoryUpgraded mockL1WrappedStakedTONFactoryUpgraded;
 
@@ -18,7 +17,7 @@ contract L1ProxyTest is L1WrappedStakedTONTest {
 
         mockL1WrappedStakedTONFactoryUpgraded = new MockL1WrappedStakedTONFactoryUpgraded();
         l1WrappedStakedtonFactoryProxy.upgradeTo(address(mockL1WrappedStakedTONFactoryUpgraded));
-        
+
         // check that the new counter storage and incrementCounter functions are deployed
         MockL1WrappedStakedTONFactoryUpgraded(l1WrappedStakedtonFactoryProxyAddress).incrementCounter();
         uint256 counter = MockL1WrappedStakedTONFactoryUpgraded(l1WrappedStakedtonFactoryProxyAddress).getCounter();
@@ -48,8 +47,10 @@ contract L1ProxyTest is L1WrappedStakedTONTest {
 
         mockL1WrappedStakedTONUpgraded = new MockL1WrappedStakedTONUpgraded();
         // the contract is upgradeable from the L1WrappedStakedTONFactory contract only
-        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(l1wrappedstakedtonProxyAddress, address(mockL1WrappedStakedTONUpgraded));
-        
+        L1WrappedStakedTONFactory(l1WrappedStakedtonFactoryProxyAddress).upgradeWstonTo(
+            l1wrappedstakedtonProxyAddress, address(mockL1WrappedStakedTONUpgraded)
+        );
+
         // check that the new counter storage and incrementCounter functions are deployed
         MockL1WrappedStakedTONUpgraded(l1wrappedstakedtonProxyAddress).incrementCounter();
         uint256 counter = MockL1WrappedStakedTONUpgraded(l1wrappedstakedtonProxyAddress).getCounter();

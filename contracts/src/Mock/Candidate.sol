@@ -2,33 +2,32 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import { IDAOCommittee } from "./interfaces/IDAOCommittee.sol";
-import { IERC20 } from  "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { ICandidate } from "./interfaces/ICandidate.sol";
-import { Layer2I } from "./interfaces/Layer2I.sol";
-import { Layer2RegistryI } from "./interfaces/Layer2RegistryI.sol";
+import {IDAOCommittee} from "./interfaces/IDAOCommittee.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ICandidate} from "./interfaces/ICandidate.sol";
+import {Layer2I} from "./interfaces/Layer2I.sol";
+import {Layer2RegistryI} from "./interfaces/Layer2RegistryI.sol";
 
 import "../proxy/ProxyStorage.sol";
-import { AccessibleCommon } from "./common/AccessibleCommon.sol";
+import {AccessibleCommon} from "./common/AccessibleCommon.sol";
 import "./CandidateStorage.sol";
 
 interface ICoinage {
-  function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 }
 
 interface IOperator {
-  function setWithdrawalDelay(uint256 withdrawalDelay_) external;
+    function setWithdrawalDelay(uint256 withdrawalDelay_) external;
 }
 
 interface IISeigManager {
-  function updateSeigniorage() external returns (bool);
-  function coinages(address layer2) external view returns (address);
+    function updateSeigniorage() external returns (bool);
+    function coinages(address layer2) external view returns (address);
 }
 
 /// @title Managing a candidate
 /// @notice Either a user or layer2 contract can be a candidate
 contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I {
-
     event TransferCoinage(address from, address to, uint256 amount);
 
     modifier onlyCandidate() {
@@ -42,7 +41,7 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
-        return  _supportedInterfaces[interfaceId] || super.supportsInterface(interfaceId) ;
+        return _supportedInterfaces[interfaceId] || super.supportsInterface(interfaceId);
     }
 
     // function _registerInterface(bytes4 interfaceId) internal virtual {
@@ -58,9 +57,7 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
         address _seigManager
     ) external {
         require(
-            _candidate != address(0)
-            || _committee != address(0)
-            || _seigManager != address(0),
+            _candidate != address(0) || _committee != address(0) || _seigManager != address(0),
             "Candidate: input is zero"
         );
         candidate = _candidate;
@@ -68,7 +65,6 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
         committee = _committee;
         seigManager = _seigManager;
         memo = _memo;
-
     }
 
     function setSeigManager(address _seigManager) external onlyOwner {
@@ -102,11 +98,7 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
     /// @notice Try to be a member
     /// @param _memberIndex The index of changing member slot
     /// @return Whether or not the execution succeeded
-    function changeMember(uint256 _memberIndex)
-        external
-        onlyCandidate
-        returns (bool)
-    {
+    function changeMember(uint256 _memberIndex) external onlyCandidate returns (bool) {
         return IDAOCommittee(committee).changeMember(_memberIndex);
     }
 
@@ -120,21 +112,11 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
     /// @param _agendaID The agenda ID
     /// @param _vote voting type
     /// @param _comment voting comment
-    function castVote(
-        uint256 _agendaID,
-        uint256 _vote,
-        string calldata _comment
-    )
-        external
-        onlyCandidate
-    {
+    function castVote(uint256 _agendaID, uint256 _vote, string calldata _comment) external onlyCandidate {
         IDAOCommittee(committee).castVote(_agendaID, _vote, _comment);
     }
 
-    function claimActivityReward()
-        external
-        onlyCandidate
-    {
+    function claimActivityReward() external onlyCandidate {
         address receiver;
 
         if (isLayer2Candidate) {
@@ -156,19 +138,27 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
         return true;
     }
 
-    function operator() external view override returns (address) { return candidate; }
-    function isLayer2() external pure override returns (bool) { return true; }
-    function currentFork() external pure override returns (uint256) { return 1; }
-    function lastEpoch(uint256 /*forkNumber*/) external pure override returns (uint256) { return 1; }
-    function changeOperator(address _operator) external override { }
+    function operator() external view override returns (address) {
+        return candidate;
+    }
+
+    function isLayer2() external pure override returns (bool) {
+        return true;
+    }
+
+    function currentFork() external pure override returns (uint256) {
+        return 1;
+    }
+
+    function lastEpoch(uint256 /*forkNumber*/ ) external pure override returns (uint256) {
+        return 1;
+    }
+
+    function changeOperator(address _operator) external override {}
 
     /// @notice Retrieves the total staked balance on this candidate
     /// @return totalsupply Total staked amount on this candidate
-    function totalStaked()
-        external
-        view
-        returns (uint256 totalsupply)
-    {
+    function totalStaked() external view returns (uint256 totalsupply) {
         IERC20 coinage = _getCoinageToken();
         return coinage.totalSupply();
     }
@@ -176,13 +166,7 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
     /// @notice Retrieves the staked balance of the account on this candidate
     /// @param _account Address being retrieved
     /// @return amount The staked balance of the account on this candidate
-    function stakedOf(
-        address _account
-    )
-        external
-        view
-        returns (uint256 amount)
-    {
+    function stakedOf(address _account) external view returns (uint256 amount) {
         IERC20 coinage = _getCoinageToken();
         return coinage.balanceOf(_account);
     }
@@ -199,5 +183,4 @@ contract Candidate is ProxyStorage, AccessibleCommon, CandidateStorage, Layer2I 
 
         return IERC20(IISeigManager(seigManager).coinages(c));
     }
-
 }

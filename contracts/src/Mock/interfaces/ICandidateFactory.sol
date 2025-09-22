@@ -8,7 +8,5 @@ interface ICandidateFactory {
         string memory _name,
         address _committee,
         address _seigManager
-    )
-        external
-        returns (address);
+    ) external returns (address);
 }

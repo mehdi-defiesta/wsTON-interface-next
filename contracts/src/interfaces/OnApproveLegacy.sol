@@ -12,5 +12,9 @@ contract OnApproveLegacy is ERC165Legacy {
         _registerInterface(OnApproveLegacy(this).onApprove.selector);
     }
 
-    function onApprove(address owner, address spender, uint256 amount, bytes calldata data) external virtual returns (bool) {}
+    function onApprove(address owner, address spender, uint256 amount, bytes calldata data)
+        external
+        virtual
+        returns (bool)
+    {}
 }

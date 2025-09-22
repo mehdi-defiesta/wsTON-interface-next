@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import { LibAgenda } from "../libraries/Agenda.sol";
-import { IDAOCommittee } from "../interfaces/IDAOCommittee.sol";
+import {LibAgenda} from "../libraries/Agenda.sol";
+import {IDAOCommittee} from "../interfaces/IDAOCommittee.sol";
 
-interface IDAOAgendaManager  {
+interface IDAOAgendaManager {
     struct Ratio {
         uint256 numerator;
         uint256 denominator;
@@ -21,9 +21,7 @@ interface IDAOAgendaManager  {
         uint256 _votingPeriodSeconds,
         bool _atomicExecute,
         bytes[] calldata _functionBytecodes
-    )
-        external
-        returns (uint256 agendaID);
+    ) external returns (uint256 agendaID);
     function castVote(uint256 _agendaID, address voter, uint256 _vote) external returns (bool);
     function setExecutedAgenda(uint256 _agendaID) external;
     function setResult(uint256 _agendaID, LibAgenda.AgendaResult _result) external;
@@ -37,7 +35,7 @@ interface IDAOAgendaManager  {
     function getVoteStatus(uint256 _agendaID, address _user) external view returns (bool, uint256);
     function getAgendaNoticeEndTimeSeconds(uint256 _agendaID) external view returns (uint256);
     function getAgendaVotingStartTimeSeconds(uint256 _agendaID) external view returns (uint256);
-    function getAgendaVotingEndTimeSeconds(uint256 _agendaID) external view returns (uint256) ;
+    function getAgendaVotingEndTimeSeconds(uint256 _agendaID) external view returns (uint256);
 
     function canExecuteAgenda(uint256 _agendaID) external view returns (bool);
     function getAgendaStatus(uint256 _agendaID) external view returns (uint256 status);
@@ -46,21 +44,12 @@ interface IDAOAgendaManager  {
     function getExecutionInfo(uint256 _agendaID)
         external
         view
-        returns(
-            address[] memory target,
-            bytes[] memory functionBytecode,
-            bool atomicExecute,
-            uint256 executeStartFrom
-        );
+        returns (address[] memory target, bytes[] memory functionBytecode, bool atomicExecute, uint256 executeStartFrom);
     function isVotableStatus(uint256 _agendaID) external view returns (bool);
     function getVotingCount(uint256 _agendaID)
         external
         view
-        returns (
-            uint256 countingYes,
-            uint256 countingNo,
-            uint256 countingAbstain
-        );
+        returns (uint256 countingYes, uint256 countingNo, uint256 countingAbstain);
     function getAgendaTimestamps(uint256 _agendaID)
         external
         view

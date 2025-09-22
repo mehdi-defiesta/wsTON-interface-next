@@ -7,6 +7,4 @@ import "./proxy/Proxy.sol";
  * @title
  * @dev
  */
-contract L1WrappedStakedTONProxy is Proxy {
-
-}
+contract L1WrappedStakedTONProxy is Proxy {}

@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import {AuthRole} from "./AuthRole.sol";
 
 contract AuthControl is AuthRole, ERC165, AccessControl {
-
     error ZeroAddress();
     error SameAdmin();
     error SameOwner();
@@ -22,26 +21,17 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
     }
 
     modifier onlyPauser() {
-        require(
-            hasRole(PAUSE_ROLE, msg.sender),
-            "AuthControl: Caller is not a pauser"
-        );
+        require(hasRole(PAUSE_ROLE, msg.sender), "AuthControl: Caller is not a pauser");
         _;
     }
 
     modifier onlyOwnerOrAdmin() {
-        require(
-            isAdmin(msg.sender) || isOwner(),
-            "not Owner or Admin"
-        );
+        require(isAdmin(msg.sender) || isOwner(), "not Owner or Admin");
         _;
     }
 
     modifier onlyOwnerOrPauser() {
-        require(
-            hasRole(PAUSE_ROLE, msg.sender) || isOwner(),
-            "AuthControl: Caller is not a pauser"
-        );
+        require(hasRole(PAUSE_ROLE, msg.sender) || isOwner(), "AuthControl: Caller is not a pauser");
         _;
     }
 
@@ -70,7 +60,7 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
         if (newOwner == address(0)) {
             revert ZeroAddress();
         }
-        
+
         if (msg.sender == newOwner) {
             revert SameOwner();
         }
@@ -95,9 +85,7 @@ contract AuthControl is AuthRole, ERC165, AccessControl {
         return hasRole(PAUSE_ROLE, account);
     }
 
-    function supportsInterface(
-        bytes4 interfaceId
-    ) public view virtual override(ERC165, AccessControl) returns (bool) {
+    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, AccessControl) returns (bool) {
         return super.supportsInterface(interfaceId);
     }
 }
